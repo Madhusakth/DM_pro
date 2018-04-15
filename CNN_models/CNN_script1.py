@@ -66,7 +66,7 @@ epochs = 20
 num_classes = len(train_Y[0])
 
 model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3),activation='linear',padding='same',input_shape=(28,28,1)))
+model.add(Conv2D(32, kernel_size=(3, 3),activation='linear',padding='same',input_shape=(256,256,1)))
 model.add(LeakyReLU(alpha=0.1))
 model.add(MaxPooling2D((2, 2),padding='same'))
 model.add(Dropout(0.25))
