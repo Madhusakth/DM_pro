@@ -23,10 +23,10 @@ print('Preprocessing Images')
 path = 'images/training'
 for filename in os.listdir(path):
     try:
-        im = Image.open(os.path.join(path, filename)).convert('LA')
+        im = Image.open(os.path.join(path, filename))
         arr = np.array(im)
         arr = arr[:,:,0]
-        arr = arr.astype('float8')
+        arr = arr.astype('float16')
         arr = arr / 255.
         inputs.append(arr)
         i = i + 1
@@ -41,6 +41,7 @@ print('Extracting Class Values')
 csvfile = open('train.csv', 'r')
 csvreader = csv.reader(csvfile)
 data = [line[:3] for line in csvreader]
+data = data[1:]
 i = 0
 for entry in data:
     if i not in skipped:
@@ -62,7 +63,7 @@ train_X,valid_X,train_label,valid_label = train_test_split(train_X, train_Y_one_
 
 batch_size = 64000
 epochs = 20
-num_classes = 15000
+num_classes = len(train_Y[0])
 
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),activation='linear',padding='same',input_shape=(28,28,1)))
