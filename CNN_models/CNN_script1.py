@@ -45,7 +45,7 @@ data = data[1:]
 i = 0
 for entry in data:
     if i not in skipped:
-        train_Y.append(entry[2])
+        train_Y.append(int(entry[2]))
 
     i = i + 1
 
@@ -59,11 +59,11 @@ train_X = train_X.reshape(-1, 256, 256, 1)
 train_Y_one_hot = to_categorical(train_Y[0:len(train_X)])
 #test_Y_one_hot = to_categorical(test_Y)
 
-train_X,valid_X,train_label,valid_label = train_test_split(train_X, train_Y_one_hot, test_size=0.2, random_state=13)
+train_X,valid_X,train_label,valid_label = train_test_split(train_X, train_Y, test_size=0.2, random_state=13)
 
 batch_size = 64000
 epochs = 20
-num_classes = len(train_Y[0])
+num_classes = len(train_Y_one_hot[0])
 
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),activation='linear',padding='same',input_shape=(256,256,1)))
@@ -84,7 +84,7 @@ model.add(LeakyReLU(alpha=0.1))
 model.add(Dropout(0.3))
 model.add(Dense(num_classes, activation='softmax'))
 
-model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.Adam(),metrics=['accuracy'])
+model.compile(loss=keras.losses.sparse_categorical_crossentropy, optimizer=keras.optimizers.Adam(),metrics=['accuracy'])
 train_dropout = model.fit(train_X, train_label, batch_size=batch_size,epochs=epochs,verbose=1,validation_data=(valid_X, valid_label))
 
 #test_eval = model.evaluate(test_X, test_Y_one_hot, verbose=0)
