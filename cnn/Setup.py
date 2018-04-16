@@ -167,8 +167,8 @@ class Setup(object):
             'epochs': self._epochs,
         }
 
-        if not os.path.exists(os.getcwd() + rel_path):
-            os.mkdir(os.getcwd() + rel_path)
+        if not os.path.exists(os.path.join(os.getcwd(), rel_path)):
+            os.mkdir(os.path.join(os.getcwd(), rel_path))
 
         if not os.path.exists(os.path.join(os.getcwd(), rel_path, self._name)):
             os.mkdir(os.path.join(os.getcwd(), rel_path, self._name))
