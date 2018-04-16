@@ -1,7 +1,10 @@
 from cnn.Setup import Setup
+import sys
+
+rel_filepath = sys.argv[1]
 
 continue_setup = Setup('')
-continue_setup.load(rel_filepath='\\setup\\cnn_landmark_32-64-128-256\\setup.json')
+continue_setup.load(rel_filepath=rel_filepath)
 
 X_train_cnn, y_train_one_hot, X_val_cnn, y_val_one_hot, X_test_cnn, y_test_one_hot = continue_setup.getData()
 
@@ -20,4 +23,4 @@ for epoch in range(continue_setup.getEpoch() + 1, 10000):
                                 test_loss=[0],
                                 allow_modify=True)
 
-    continue_setup.save('\\setup\\')
+    continue_setup.save('setup')

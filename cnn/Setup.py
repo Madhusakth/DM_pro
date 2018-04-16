@@ -6,6 +6,7 @@ import os
 import datetime
 import glob
 import re
+import ntpath
 
 from keras.models import load_model
 
@@ -134,22 +135,27 @@ class Setup(object):
     def save(self, rel_path):
         # Save every information or object
 
+        if rel_path is None:
+            raise ValueError('rel_path should be None')
+        else:
+            pass
+
         self._setup = {
             'name': self._name,
             'time': str(datetime.datetime.now()),
 
             'file': {
-                'model': rel_path + '\\' + self._name + '\\' + 'model.h5',
-                'model_arch_json': rel_path + '\\' + self._name + '\\' + 'model_architecture.json',
-                'model_arch_yaml': rel_path + '\\' + self._name + '\\' + 'model_architecture.yaml',
-                'model_weights': rel_path + '\\' + self._name + '\\' +'model_weights.h5',
-                'XTrain': rel_path + '\\' + self._name + '\\' +'XTrain.npy',
-                'XValidation': rel_path + '\\' + self._name + '\\' +'XValidation.npy',
-                'XTest': rel_path + '\\' + self._name + '\\' +'XTest.npy',
-                'YTrain': rel_path + '\\' + self._name + '\\' +'YTrain.npy',
-                'YValidation': rel_path + '\\' + self._name + '\\' +'YValidation.npy',
-                'YTest': rel_path + '\\' + self._name + '\\' +'YTest.npy',
-                'setup': rel_path + '\\' + self._name + '\\' +'setup.json',
+                'model': os.path.join(rel_path, self._name, 'model.h5'),
+                'model_arch_json': os.path.join(rel_path, self._name, 'model_architecture.json'),
+                'model_arch_yaml': os.path.join(rel_path, self._name, 'model_architecture.yaml'),
+                'model_weights': os.path.join(rel_path, self._name, 'model_weights.h5'),
+                'XTrain': os.path.join(rel_path, self._name, 'XTrain.npy'),
+                'XValidation': os.path.join(rel_path, self._name, 'XValidation.npy'),
+                'XTest': os.path.join(rel_path, self._name, 'XTest.npy'),
+                'YTrain': os.path.join(rel_path, self._name, 'YTrain.npy'),
+                'YValidation': os.path.join(rel_path, self._name, 'YValidation.npy'),
+                'YTest': os.path.join(rel_path, self._name, 'YTest.npy'),
+                'setup': os.path.join(rel_path, self._name, 'setup.json'),
             },
             'train_accuracy': self._train_accuracy,
             'train_loss': self._train_loss,
@@ -164,13 +170,13 @@ class Setup(object):
         if not os.path.exists(os.getcwd() + rel_path):
             os.mkdir(os.getcwd() + rel_path)
 
-        if not os.path.exists(os.getcwd() + rel_path + '\\' + self._name + '\\'):
-            os.mkdir(os.getcwd() + rel_path + '\\' + self._name + '\\')
+        if not os.path.exists(os.path.join(os.getcwd(), rel_path, self._name)):
+            os.mkdir(os.path.join(os.getcwd(), rel_path, self._name))
 
-        if len(glob.glob(os.getcwd() + rel_path + '\\' + self._name + '\\' + '*.*')) > 0:
+        if len(glob.glob(os.path.join(os.getcwd(), rel_path, self._name, '*.*'))) > 0:
             versions = []
             pattern = r'^.*version(?P<versionnumber>\d*)$'
-            for dir in glob.glob(os.getcwd() + rel_path + '\\' + self._name + '\\' + 'version*'):
+            for dir in glob.glob(os.path.join(os.getcwd(), rel_path, self._name, 'version*')):
                 regex = re.search(pattern, dir)
                 versions.append(int(regex.group('versionnumber')))
             if len(versions) == 0:
@@ -178,56 +184,60 @@ class Setup(object):
             else:
                 maxVer = np.max(versions)
 
-            newVerDirName = '\\version%s\\' % (maxVer + 1)
-            os.mkdir(os.getcwd() + rel_path + '\\' + self._name + '\\' + newVerDirName)
-            print('here')
-            print(os.getcwd())
-            self._backup_version(os.getcwd() + rel_path + '\\' + self._name + '\\', os.getcwd() + rel_path + '\\' + self._name + '\\' + newVerDirName)
+            newVerDirName = 'version%s' % (maxVer + 1)
+            os.mkdir(os.path.join(os.getcwd(), rel_path, self._name, newVerDirName))
+            self._backup_version(os.path.join(os.getcwd(), rel_path, self._name),
+                                 os.path.join(os.getcwd(), rel_path, self._name, newVerDirName))
 
         # ==========================================
         # Save whole model
-        self._model.save(os.getcwd() + self._setup['file']['model'])
+        self._model.save(os.path.join(os.getcwd(), self._setup['file']['model']))
 
         # ==========================================
         # Save model architecture
         json_model_arch = self._model.to_json()
-        with open(os.getcwd() + self._setup['file']['model_arch_json'], 'w') as jsonfile:
+        with open(os.path.join(os.getcwd(), self._setup['file']['model_arch_json']), 'w') as jsonfile:
             jsonfile.write(json_model_arch)
 
         yaml_model_arch = self._model.to_yaml()
-        with open(os.getcwd() + self._setup['file']['model_arch_yaml'], 'w') as yamlfile:
+        with open(os.path.join(os.getcwd(), self._setup['file']['model_arch_yaml']), 'w') as yamlfile:
             yamlfile.write(yaml_model_arch)
 
         # ==========================================
         # Save model weights
-        self._model.save_weights(os.getcwd() + self._setup['file']['model_weights'])
+        self._model.save_weights(os.path.join(os.getcwd(), self._setup['file']['model_weights']))
 
         # ==========================================
         # Save data
         if self._XTrain is not None and type(self._XTrain) == np.ndarray:
-            np.save(os.getcwd() + self._setup['file']['XTrain'], self._XTrain)
+            np.save(os.path.join(os.getcwd(), self._setup['file']['XTrain']), self._XTrain)
         if self._XValidation is not None and type(self._XValidation) == np.ndarray:
-            np.save(os.getcwd() + self._setup['file']['XValidation'], self._XValidation)
+            np.save(os.path.join(os.getcwd(), self._setup['file']['XValidation']), self._XValidation)
         if self._XTest is not None and type(self._XTest) == np.ndarray:
-            np.save(os.getcwd() + self._setup['file']['XTest'], self._XTest)
+            np.save(os.path.join(os.getcwd(), self._setup['file']['XTest']), self._XTest)
         if self._YTrain is not None and type(self._YTrain) == np.ndarray:
-            np.save(os.getcwd() + self._setup['file']['YTrain'], self._YTrain)
+            np.save(os.path.join(os.getcwd(), self._setup['file']['YTrain']), self._YTrain)
         if self._YValidation is not None and type(self._YValidation) == np.ndarray:
-            np.save(os.getcwd() + self._setup['file']['YValidation'], self._YValidation)
+            np.save(os.path.join(os.getcwd(), self._setup['file']['YValidation']), self._YValidation)
         if self._YTest is not None and type(self._YTest) == np.ndarray:
-            np.save(os.getcwd() + self._setup['file']['YTest'], self._YTest)
+            np.save(os.path.join(os.getcwd(), self._setup['file']['YTest']), self._YTest)
 
         # ==========================================
         # Save setup
-        with open(os.getcwd() + self._setup['file']['setup'], 'w') as setupfile:
+        with open(os.path.join(os.getcwd(), self._setup['file']['setup']), 'w') as setupfile:
             json.dump(self._setup, setupfile)
 
     def load(self, rel_filepath):
-        directory = os.getcwd()
+        cwd = os.getcwd()
+
+        if rel_filepath is None:
+            raise ValueError('rel_filepath should be None')
+        else:
+            pass
 
         # ==========================================
         # Load info
-        with open(directory + rel_filepath, 'r') as setupfile:
+        with open(os.path.join(cwd, rel_filepath), 'r') as setupfile:
             self._setup = json.load(setupfile)
 
         # ==========================================
@@ -236,29 +246,35 @@ class Setup(object):
 
         # ==========================================
         # Load whole model
-        self._model = load_model(directory + self._setup['file']['model'])
+        self._model = load_model(os.path.join(cwd, self._setup['file']['model']))
 
         # TODO: if loading from model h5 file fails, then load from model arch file and load weights
         # # ==========================================
         # # Load model architecture
-        # with open(directory + self.setup['model_arch_json'], 'r') as jsonfile:
+        # with open(os.path.join(directory, self.setup['model_arch_json']), 'r') as jsonfile:
         #     self.emptyModel = model_from_json(jsonfile.read())
         #
-        # with open(directory + self.setup['model_arch_yaml'], 'r') as yamlfile:
+        # with open(os.path.join(directory, self.setup['model_arch_yaml']), 'r') as yamlfile:
         #     self.emptyModel = model_from_yaml(yamlfile.read())
 
         # # ==========================================
         # # Load model weights
-        # self.model.load_weights(directory + self.setup['model_weights'])
+        # self.model.load_weights(os.path.join(directory, self.setup['model_weights']))
 
         # ==========================================
         # Load data
-        self._XTrain = np.load(directory + self._setup['file']['XTrain']) if os.path.exists(directory + self._setup['file']['XTrain']) else self._XTrain
-        self._XValidation = np.load(directory + self._setup['file']['XValidation']) if os.path.exists(directory + self._setup['file']['XValidation']) else self._XValidation
-        self._XTest = np.load(directory + self._setup['file']['XTest']) if os.path.exists(directory + self._setup['file']['XTest']) else self._XTest
-        self._YTrain = np.load(directory + self._setup['file']['YTrain']) if os.path.exists(directory + self._setup['file']['YTrain']) else self._YTrain
-        self._YValidation = np.load(directory + self._setup['file']['YValidation']) if os.path.exists(directory + self._setup['file']['YValidation']) else self._YValidation
-        self._YTest = np.load(directory + self._setup['file']['YTest']) if os.path.exists(directory + self._setup['file']['YTest']) else self._YTest
+        self._XTrain = np.load(os.path.join(cwd, self._setup['file']['XTrain'])) \
+            if os.path.exists(os.path.join(cwd, self._setup['file']['XTrain'])) else self._XTrain
+        self._XValidation = np.load(os.path.join(cwd, self._setup['file']['XValidation'])) \
+            if os.path.exists(os.path.join(cwd, self._setup['file']['XValidation'])) else self._XValidation
+        self._XTest = np.load(os.path.join(cwd, self._setup['file']['XTest'])) \
+            if os.path.exists(os.path.join(cwd, self._setup['file']['XTest'])) else self._XTest
+        self._YTrain = np.load(os.path.join(cwd, self._setup['file']['YTrain'])) \
+            if os.path.exists(os.path.join(cwd, self._setup['file']['YTrain'])) else self._YTrain
+        self._YValidation = np.load(os.path.join(cwd, self._setup['file']['YValidation'])) \
+            if os.path.exists(os.path.join(cwd, self._setup['file']['YValidation'])) else self._YValidation
+        self._YTest = np.load(os.path.join(cwd, self._setup['file']['YTest'])) \
+            if os.path.exists(os.path.join(cwd, self._setup['file']['YTest'])) else self._YTest
 
         # Load info
         self._train_accuracy = self._setup['train_accuracy']
@@ -276,7 +292,7 @@ class Setup(object):
                        'YTrain',
                        'YValidation',
                        'YTest']
-        for file in glob.glob(source + '*.*'):
+        for file in glob.glob(os.path.join(source, '*.*')):
             ignore = False
             for ignored_filename in ignore_list:
                 if ignored_filename in file:
@@ -285,4 +301,4 @@ class Setup(object):
             if ignore:
                 continue
             else:
-                os.rename(file, destination + file.split('\\')[-1])
+                os.rename(file, os.path.join(destination, ntpath.basename(file)))

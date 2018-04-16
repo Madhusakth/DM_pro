@@ -121,4 +121,4 @@ class TestSetup(TestCase):
         self.setup.setData(YValidation=self.valid_label)
         self.setup.setData(YTest=self.test_Y)
 
-        self.setup.save('\\setup\\')
+        self.setup.save('setup')
