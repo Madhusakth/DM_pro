@@ -14,41 +14,37 @@ from keras.layers.advanced_activations import LeakyReLU
 
 #from keras.datasets import fashion_mnist
 #(train_X,train_Y), (test_X,test_Y) = fashion_mnist.load_data()
-i = 0
-skipped = []
 inputs = []
 train_Y = []
 
 print('Preprocessing Images')
-path = 'images/training'
-for filename in os.listdir(path):
-    try:
-        im = Image.open(os.path.join(path, filename))
-        arr = np.array(im)
-        arr = arr[:,:,0]
-        arr = arr.astype('float16')
-        arr = arr / 255.
-        inputs.append(arr)
-        i = i + 1
-    except Exception as e:
-        print('Can not identify file %s' %(filename))
-        skipped.append(i)
-        i = i + 1
-
-train_X = np.array(inputs)
-
-print('Extracting Class Values')
 csvfile = open('train.csv', 'r')
 csvreader = csv.reader(csvfile)
 data = [line[:3] for line in csvreader]
 data = data[1:]
 i = 0
-for entry in data:
-    if i not in skipped:
-        train_Y.append(int(entry[2]))
 
-    i = i + 1
+path = 'images/training'
+for filename in os.listdir(path):
+    entry = int(data[i][2])
+    if entry > 150 or entry < 0:
+        i = i + 1
+        continue
 
+    try:
+        im = Image.open(os.path.join(path, filename)).convert('LA')
+        arr = np.array(im)
+        arr = arr[:,:,0]
+        arr = arr.astype('float16')
+        arr = arr / 255.
+        inputs.append(arr)
+        train_Y.append(entry)
+        i = i + 1
+    except Exception as e:
+        print('Can not identify file %s' %(filename))
+        i = i + 1
+
+train_X = np.array(inputs)
 train_X = train_X.reshape(-1, 256, 256, 1)
 
 #train_X = train_X.astype('float32')
@@ -56,14 +52,14 @@ train_X = train_X.reshape(-1, 256, 256, 1)
 #train_X = train_X / 255. 
 #test_X = test_X / 255.
 
-train_Y_one_hot = to_categorical(train_Y[0:len(train_X)])
+#train_Y_one_hot = to_categorical(train_Y[0:len(train_X)])
 #test_Y_one_hot = to_categorical(test_Y)
 
 train_X,valid_X,train_label,valid_label = train_test_split(train_X, train_Y, test_size=0.2, random_state=13)
 
-batch_size = 64000
+batch_size = 64
 epochs = 20
-num_classes = len(train_Y_one_hot[0])
+num_classes = 14950#len(train_Y_one_hot[0])
 
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),activation='linear',padding='same',input_shape=(256,256,1)))
@@ -85,6 +81,9 @@ model.add(Dropout(0.3))
 model.add(Dense(num_classes, activation='softmax'))
 
 model.compile(loss=keras.losses.sparse_categorical_crossentropy, optimizer=keras.optimizers.Adam(),metrics=['accuracy'])
+
+model.summary()
+
 train_dropout = model.fit(train_X, train_label, batch_size=batch_size,epochs=epochs,verbose=1,validation_data=(valid_X, valid_label))
 
 #test_eval = model.evaluate(test_X, test_Y_one_hot, verbose=0)
