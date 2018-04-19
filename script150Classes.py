@@ -22,9 +22,12 @@ for entry in data:
 
 temp = sorted(numSamples, key=numSamples.get)
 
-for i in reversed(temp):
-    topClasses.append(i)
-
+for kk in reversed(temp):
+    topClasses.append(kk)
+    i = i + 1
+    if i > 150:
+        break
+i = 0
 path = 'images/training'
 for filename in os.listdir(path):
     entry = int(data[i][2])
