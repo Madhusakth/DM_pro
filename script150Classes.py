@@ -8,13 +8,13 @@ inputs = []
 train_Y = []
 
 print('Preprocessing Images')
-csvfile = open('train.csv', 'r')
+csvfile = open('../train.csv', 'r')
 csvreader = csv.reader(csvfile)
 data = [line[:3] for line in csvreader]
 data = data[1:]
 i = 0
 
-path = 'images/training'
+path = '../training-images'
 for filename in os.listdir(path):
     entry = int(data[i][2])
     if entry > 150 or entry < 0:
