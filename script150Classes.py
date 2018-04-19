@@ -22,8 +22,8 @@ for entry in data:
 
 temp = sorted(numSamples, key=numSamples.get)
 
-for i in range(0, 151):
-    topClasses.append(temp[i])
+for i in reversed(temp):
+    topClasses.append(i)
 
 path = 'images/training'
 for filename in os.listdir(path):
