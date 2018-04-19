@@ -4,6 +4,8 @@ from PIL import Image
 import os, os.path
 from sklearn.model_selection import train_test_split
 
+numSamples = {}
+topClasses = []
 inputs = []
 train_Y = []
 
@@ -14,10 +16,19 @@ data = [line[:3] for line in csvreader]
 data = data[1:]
 i = 0
 
+for entry in data:
+    classVal = int(entry[2])
+    numSamples[classVal] = numSamples.get(classVal, 0) + 1
+
+temp = sorted(numSamples, key=numSamples.get)
+
+for i in range(0, 151):
+    topClasses.append(temp[i])
+
 path = 'images/training'
 for filename in os.listdir(path):
     entry = int(data[i][2])
-    if entry > 150 or entry < 0:
+    if entry not in topClasses:
         i = i + 1
         continue
 
@@ -38,4 +49,5 @@ train_X = np.array(inputs)
 train_X = train_X.reshape(-1, 256, 256, 1)
 
 train_X,valid_X,train_label,valid_label = train_test_split(train_X, train_Y, test_size=0.2, random_state=13)
+
 
