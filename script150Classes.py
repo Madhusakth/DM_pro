@@ -16,6 +16,7 @@ data = [line[:3] for line in csvreader]
 data = data[1:]
 i = 0
 
+"""
 for entry in data:
     classVal = int(entry[2])
     numSamples[classVal] = numSamples.get(classVal, 0) + 1
@@ -28,10 +29,11 @@ for kk in reversed(temp):
     if i > 150:
         break
 i = 0
-path = 'images/training'
+"""
+path = '../images/training'
 for filename in os.listdir(path):
     entry = int(data[i][2])
-    if entry not in topClasses:
+    if entry > 450 or entry < 0:
         i = i + 1
         continue
 
