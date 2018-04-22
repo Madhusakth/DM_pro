@@ -37,56 +37,49 @@ def plot_image(image_array):
 pixels = 256 * 256
 data_limit = 35000
 
-label_train_data = pd.read_csv(os.path.join(os.getcwd(), '../data_reduced/train.csv'), index_col='id')
-label_test_data = pd.read_csv(os.path.join(os.getcwd(), '../data_reduced/test.csv'), index_col='id')
 
-image_train_file_list = glob.glob(os.path.join(os.getcwd(), '../data_reduced/train/' + "*.jpg"))
-image_train_name = []
-image_train_data = []
-image_train_label = []
-for index, image_path in enumerate(image_train_file_list):
-    image_name = ntpath.basename(image_path)
-    try:
-        name = image_name
-        data = read_image_list(image_path)
-        label = label_train_data.loc[image_name.split('.jpg')[0]]['landmark_id']
-        image_train_name.append(name)
-        image_train_data.append(data)
-        image_train_label.append(label)
-    except KeyError as e:
-        print(e)
+def getImageTrainData(data_limit):
+    label_train_data = pd.read_csv(os.path.join(os.getcwd(), '../data_reduced/train.csv'), index_col='id')
+    image_train_file_list = glob.glob(os.path.join(os.getcwd(), '../data_reduced/train/' + "*.jpg"))
+    image_train_name = []
+    image_train_data = []
+    image_train_label = []
+    for index, image_path in enumerate(image_train_file_list):
+        image_name = ntpath.basename(image_path)
+        try:
+            image_train_name.append(image_name)
+            arr = np.array(read_image_list(image_path))
+            arr.astype('float16')
+            arr = arr / 255.
+            image_train_data.append(arr)
+            image_train_label.append(label_train_data.loc[image_name.split('.jpg')[0]]['landmark_id'])
+        except KeyError as e:
+            print('KeyError')
 
-    if (data_limit > 0 or data_limit is not False) and index + 1 >= data_limit:
-        break
+        if (data_limit > 0 or data_limit is not False) and index + 1 >= data_limit:
+            break
 
-image_test_file_list = glob.glob(os.path.join(os.getcwd(), '../data_reduced/test/' + "*.jpg"))
-image_test_name = []
-image_test_data = []
-for index, image_path in enumerate(image_test_file_list):
-    image_name = ntpath.basename(image_path)
-    try:
-        name = image_name
-        data = read_image_list(image_path)
-        image_test_name.append(name)
-        image_test_data.append(data)
-    except KeyError as e:
-        print(e)
+    image_train_data = np.array(image_train_data)
+    image_train_data.reshape(-1, 256, 256, 1)
+    return image_train_name, image_train_data, image_train_label
 
-    if (data_limit > 0 or data_limit is not False) and index + 1 >= data_limit:
-        break
 
-# # Preprocessing
-numerical_pipeline = Pipeline([
-    ('std_scaler', preprocessing.StandardScaler())
-])
+def getImageTestData(data_limit):
+    image_test_file_list = glob.glob(os.path.join(os.getcwd(), '../data_reduced/test/' + "*.jpg"))
+    image_test_name = []
+    image_test_data = []
+    for index, image_path in enumerate(image_test_file_list):
+        image_name = ntpath.basename(image_path)
+        try:
+            image_test_name.append(image_name)
+            image_test_data.append(read_image_list(image_path))
+        except KeyError as e:
+            print('KeyError')
 
-preprocess_machine = FeatureUnion(transformer_list=[
-    ('numerical_pipeline', numerical_pipeline)
-])
+        if (data_limit > 0 or data_limit is not False) and index + 1 >= data_limit:
+            break
 
-# X_train = preprocess_machine.fit_transform(X_train)
-# X_test = preprocess_machine.fit_transform(X_test)
-stdSc = preprocessing.StandardScaler()
+    return image_test_name, image_test_data
 
 def split(array, size):
     arrays = []
@@ -97,26 +90,18 @@ def split(array, size):
     arrays.append(array)
     return arrays
 
+_, X, y = getImageTrainData(data_limit)
 
-image_train_data_split = split(image_train_data, 5)
+X_train, X_test = np.empty((0, 65536))
+y_train, y_test = np.empty(0)
 
-for arr in image_train_data_split:
-    try:
-        stdSc.partial_fit(arr)
-    except MemoryError as e:
-        print(e)
-
-X = np.empty((0, 65536))
-for arr in image_train_data_split:
-    try:
-        nparr = np.array(stdSc.transform(arr))
-        X = np.append(X, nparr, axis=0)
-    except MemoryError as e:
-        print(e)
-
-
-X_train, X_test, y_train, y_test = train_test_split(X, image_train_label, test_size=0.2)
-
+y_split = split(y, 100)
+for index, x in enumerate(split(X, 100)):
+    X_train_split, X_test_split, y_train_split, y_test_split = train_test_split(x, y_split[index], test_size=0.2)
+    X_train.append(X_train_split)
+    X_test.append(X_test_split)
+    y_train.append(y_train_split)
+    y_test.append(y_test_split)
 
 # # Convolutional Neural Network Model
 
@@ -161,7 +146,7 @@ y_test_one_hot = to_categorical(y_test, num_classes=num_classes)
 
 # # Setup
 
-cnn_setup = Setup('101.cnn_landmark_32-64-128-256_k88_reduced450')
+cnn_setup = Setup('cnn_landmark_32-64-128-256_k88')
 cnn_setup.setModel(cnn)
 cnn_setup.setData(XTrain=X_train_cnn,
                   YTrain=y_train_one_hot,
