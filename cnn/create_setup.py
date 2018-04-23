@@ -24,21 +24,32 @@ no_of_classes = 50
 
 # # Convolutional Neural Network Model
 print('Creating Model ...')
+model_number = 207
+
+first_layer = 32
+second_layer = 64
+third_layer = 128
+forth_layer = 256
+
+kernel_size = (3, 3)
+pool_size = (3, 3)
+strides = (1, 1)
+
 cnn = Sequential()
-cnn.add(Conv2D(32, kernel_size=(7, 7), strides=(3, 3), activation='linear', padding='same', input_shape=(256, 256, 1)))
+cnn.add(Conv2D(first_layer, kernel_size=kernel_size, strides=strides, activation='linear', padding='same', input_shape=(256, 256, 1)))
 cnn.add(LeakyReLU(alpha=0.1))
-cnn.add(MaxPooling2D((7, 7), padding='same'))
+cnn.add(MaxPooling2D(pool_size=pool_size, padding='same'))
 cnn.add(Dropout(0.25))
-cnn.add(Conv2D(64, (7, 7), strides=(3, 3), activation='linear', padding='same'))
+cnn.add(Conv2D(second_layer, kernel_size=kernel_size, strides=strides, activation='linear', padding='same'))
 cnn.add(LeakyReLU(alpha=0.1))
-cnn.add(MaxPooling2D(pool_size=(7, 7), padding='same'))
+cnn.add(MaxPooling2D(pool_size=pool_size, padding='same'))
 cnn.add(Dropout(0.25))
-cnn.add(Conv2D(64, (7, 7), strides=(3, 3), activation='linear', padding='same'))
+cnn.add(Conv2D(third_layer, kernel_size=kernel_size, strides=strides, activation='linear', padding='same'))
 cnn.add(LeakyReLU(alpha=0.1))
-cnn.add(MaxPooling2D(pool_size=(7, 7), padding='same'))
+cnn.add(MaxPooling2D(pool_size=pool_size, padding='same'))
 cnn.add(Dropout(0.4))
 cnn.add(Flatten())
-cnn.add(Dense(256, activation='linear'))
+cnn.add(Dense(forth_layer, activation='linear'))
 cnn.add(LeakyReLU(alpha=0.1))
 cnn.add(Dropout(0.3))
 cnn.add(Dense(no_of_classes + 1, activation='softmax'))
@@ -47,7 +58,15 @@ cnn.compile(loss=keras.losses.categorical_crossentropy,
             optimizer=keras.optimizers.SGD(),
             metrics=['accuracy'])
 
-cnn_setup = Setup('206.cnn_landmark_32-64-128-256_k77_reduced%d' % no_of_classes)
+cnn_setup = Setup('%s.cnn_landmark_%s-%s-%s-%s_k%s%s_p%s%s_s%s%s_reduced%d' % (model_number,
+                                                                               first_layer,
+                                                                               second_layer,
+                                                                               third_layer,
+                                                                               forth_layer,
+                                                                               kernel_size[0], kernel_size[1],
+                                                                               pool_size[0], pool_size[1],
+                                                                               strides[0], strides[1],
+                                                                               no_of_classes))
 
 # # ==========================================================================================
 # # ==========================================================================================
