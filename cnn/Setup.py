@@ -59,6 +59,9 @@ class Setup(object):
             'epochs': self._epochs,
         }
 
+    def getName(self):
+        return self._name
+
     def setName(self, name):
         self._name = name
 
