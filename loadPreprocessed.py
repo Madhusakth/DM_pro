@@ -1,4 +1,5 @@
 import csv
+import operator
 import numpy as np
 from PIL import Image
 import os, os.path
@@ -14,6 +15,7 @@ csvfile = open('train.csv', 'r')
 csvreader = csv.reader(csvfile)
 data = [line[:3] for line in csvreader]
 data = data[1:]
+data = sorted(data, key=operator.itemgetter(0))
 i = 0
 kk = 0
 
@@ -24,6 +26,7 @@ path = 'images/training'
 for entry in data:
     if int(entry[2]) > 450 or int(entry[2]) < 0:
         i = i + 1
+	kk = kk + 1
         continue
     try:
         filename = entry[0] + '.jpg'
