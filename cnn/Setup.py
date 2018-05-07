@@ -24,6 +24,13 @@ class Setup(object):
         self._YValidation = None
         self._YTest = None
 
+        self._XTrain_directory = None
+        self._XValidation_directory = None
+        self._XTest_directory = None
+        self._YTrain_directory = None
+        self._YValidation_directory = None
+        self._YTest_directory = None
+
         self._train_accuracy = []
         self._train_loss = []
         self._val_accuracy = []
@@ -38,16 +45,27 @@ class Setup(object):
             'name': self._name,
 
             'file': {
-                'model': None,
-                'model_arch_json': None,
-                'model_arch_yaml': None,
-                'model_weights': None,
-                'XTrain': None,
-                'XValidation': None,
-                'XTest': None,
-                'YTrain': None,
-                'YValidation': None,
-                'YTest': None,
+                'setup': '',
+                'model': '',
+                'model_arch_json': '',
+                'model_arch_yaml': '',
+                'model_weights': '',
+
+                'XTrain': '',
+                'XValidation': '',
+                'XTest': '',
+                'YTrain': '',
+                'YValidation': '',
+                'YTest': '',
+            },
+
+            'directory': {
+                'XTrain': '',
+                'XValidation': '',
+                'XTest': '',
+                'YTrain': '',
+                'YValidation': '',
+                'YTest': '',
             },
 
             'train_accuracy': self._train_accuracy,
@@ -82,6 +100,17 @@ class Setup(object):
         self._YTrain = YTrain if YTrain is not None else self._YTrain
         self._YValidation = YValidation if YValidation is not None else self._YValidation
         self._YTest = YTest if YTest is not None else self._YTest
+
+    def getDataDirectory(self):
+        return self._XTrain_directory, self._YTrain_directory, self._XValidation_directory, self._YValidation_directory, self._XTest_directory, self._YTest_directory
+
+    def setDataDirectory(self, XTrain_directory=None, YTrain_directory=None, XValidation_directory=None, YValidation_directory=None, XTest_directory=None, YTest_directory=None):
+        self._XTrain_directory = XTrain_directory if XTrain_directory is not None else self._XTrain_directory
+        self._XValidation_directory = XValidation_directory if XValidation_directory is not None else self._XValidation_directory
+        self._XTest_directory = XTest_directory if XTest_directory is not None else self._XTest_directory
+        self._YTrain_directory = YTrain_directory if YTrain_directory is not None else self._YTrain_directory
+        self._YValidation_directory = YValidation_directory if YValidation_directory is not None else self._YValidation_directory
+        self._YTest_directory = YTest_directory if YTest_directory is not None else self._YTest_directory
 
     def getEpoch(self):
         return self._epochs
@@ -139,36 +168,40 @@ class Setup(object):
         # Save every information or object
 
         if rel_path is None:
-            raise ValueError('rel_path should be None')
+            raise ValueError('rel_path should not be None')
         else:
             pass
 
-        self._setup = {
-            'name': self._name,
-            'time': str(datetime.datetime.now()),
+        self._setup['name'] = self._name
+        self._setup['time'] = str(datetime.datetime.now()),
 
-            'file': {
-                'model': os.path.join(rel_path, self._name, 'model.h5'),
-                'model_arch_json': os.path.join(rel_path, self._name, 'model_architecture.json'),
-                'model_arch_yaml': os.path.join(rel_path, self._name, 'model_architecture.yaml'),
-                'model_weights': os.path.join(rel_path, self._name, 'model_weights.h5'),
-                'XTrain': os.path.join(rel_path, self._name, 'XTrain.npy'),
-                'XValidation': os.path.join(rel_path, self._name, 'XValidation.npy'),
-                'XTest': os.path.join(rel_path, self._name, 'XTest.npy'),
-                'YTrain': os.path.join(rel_path, self._name, 'YTrain.npy'),
-                'YValidation': os.path.join(rel_path, self._name, 'YValidation.npy'),
-                'YTest': os.path.join(rel_path, self._name, 'YTest.npy'),
-                'setup': os.path.join(rel_path, self._name, 'setup.json'),
-            },
-            'train_accuracy': self._train_accuracy,
-            'train_loss': self._train_loss,
-            'val_accuracy': self._val_accuracy,
-            'val_loss': self._val_loss,
-            'test_accuracy': self._test_accuracy,
-            'test_loss': self._test_loss,
+        self._setup['file']['setup'] = os.path.join(rel_path, self._name, 'setup.json')
+        self._setup['file']['model'] = os.path.join(rel_path, self._name, 'model.h5')
+        self._setup['file']['model_arch_json'] = os.path.join(rel_path, self._name, 'model_architecture.json')
+        self._setup['file']['model_arch_yaml'] = os.path.join(rel_path, self._name, 'model_architecture.yaml')
+        self._setup['file']['model_weights'] = os.path.join(rel_path, self._name, 'model_weights.h5')
 
-            'epochs': self._epochs,
-        }
+        self._setup['file']['XTrain'] = os.path.join(rel_path, self._name, 'XTrain.npy')
+        self._setup['file']['XValidation'] = os.path.join(rel_path, self._name, 'XValidation.npy')
+        self._setup['file']['XTest'] = os.path.join(rel_path, self._name, 'XTest.npy')
+        self._setup['file']['YTrain'] = os.path.join(rel_path, self._name, 'YTrain.npy')
+        self._setup['file']['YValidation'] = os.path.join(rel_path, self._name, 'YValidation.npy')
+        self._setup['file']['YTest'] = os.path.join(rel_path, self._name, 'YTest.npy')
+
+        self._setup['directory']['XTrain'] = self._XTrain_directory
+        self._setup['directory']['XValidation'] = self._XValidation_directory
+        self._setup['directory']['XTest'] = self._XTest_directory
+        self._setup['directory']['YTrain'] = self._YTrain_directory
+        self._setup['directory']['YValidation'] = self._YValidation_directory
+        self._setup['directory']['YTest'] = self._YTest_directory
+
+        self._setup['train_accuracy'] = self._train_accuracy
+        self._setup['train_loss'] = self._train_loss
+        self._setup['val_accuracy'] = self._val_accuracy
+        self._setup['val_loss'] = self._val_loss
+        self._setup['test_accuracy'] = self._test_accuracy
+        self._setup['test_loss'] = self._test_loss
+        self._setup['epochs'] = self._epochs
 
         if not os.path.exists(os.path.join(os.getcwd(), rel_path)):
             os.mkdir(os.path.join(os.getcwd(), rel_path))
@@ -213,17 +246,35 @@ class Setup(object):
         # ==========================================
         # Save data
         if self._XTrain is not None and type(self._XTrain) == np.ndarray:
-            np.save(os.path.join(os.getcwd(), self._setup['file']['XTrain']), self._XTrain)
+            try:
+                np.save(os.path.join(os.getcwd(), self._setup['file']['XTrain']), self._XTrain)
+            except Exception as e:
+                self._setup['file']['XTrain'] = None
         if self._XValidation is not None and type(self._XValidation) == np.ndarray:
-            np.save(os.path.join(os.getcwd(), self._setup['file']['XValidation']), self._XValidation)
+            try:
+                np.save(os.path.join(os.getcwd(), self._setup['file']['XValidation']), self._XValidation)
+            except Exception as e:
+                self._setup['file']['XValidation'] = None
         if self._XTest is not None and type(self._XTest) == np.ndarray:
-            np.save(os.path.join(os.getcwd(), self._setup['file']['XTest']), self._XTest)
+            try:
+                np.save(os.path.join(os.getcwd(), self._setup['file']['XTest']), self._XTest)
+            except Exception as e:
+                self._setup['file']['XTest'] = None
         if self._YTrain is not None and type(self._YTrain) == np.ndarray:
-            np.save(os.path.join(os.getcwd(), self._setup['file']['YTrain']), self._YTrain)
+            try:
+                np.save(os.path.join(os.getcwd(), self._setup['file']['YTrain']), self._YTrain)
+            except Exception as e:
+                self._setup['file']['YTrain'] = None
         if self._YValidation is not None and type(self._YValidation) == np.ndarray:
-            np.save(os.path.join(os.getcwd(), self._setup['file']['YValidation']), self._YValidation)
+            try:
+                np.save(os.path.join(os.getcwd(), self._setup['file']['YValidation']), self._YValidation)
+            except Exception as e:
+                self._setup['file']['YValidation'] = None
         if self._YTest is not None and type(self._YTest) == np.ndarray:
-            np.save(os.path.join(os.getcwd(), self._setup['file']['YTest']), self._YTest)
+            try:
+                np.save(os.path.join(os.getcwd(), self._setup['file']['YTest']), self._YTest)
+            except Exception as e:
+                self._setup['file']['YTest'] = None
 
         # ==========================================
         # Save setup
@@ -279,6 +330,16 @@ class Setup(object):
         self._YTest = np.load(os.path.join(cwd, self._setup['file']['YTest'])) \
             if os.path.exists(os.path.join(cwd, self._setup['file']['YTest'])) else self._YTest
 
+        # ==========================================
+        # Load data directory
+        self._XTrain_directory = self._setup['directory']['XTrain']
+        self._XValidation_directory = self._setup['directory']['XValidation']
+        self._XTest_directory = self._setup['directory']['XTest']
+        self._YTrain_directory = self._setup['directory']['YTrain']
+        self._YValidation_directory = self._setup['directory']['YValidation']
+        self._YTest_directory = self._setup['directory']['YTest']
+
+        # ==========================================
         # Load info
         self._train_accuracy = self._setup['train_accuracy']
         self._train_loss = self._setup['train_loss']
