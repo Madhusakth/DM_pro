@@ -42,7 +42,7 @@ def train_data_generator(XTrain_directory, YTrain_directory):
             else:
                 end = int(filename.replace('.npy', '')) - 1
                 start = end - 2000
-            X = X.reshape(-1, 2048, 1, 1)
+            X = X.reshape(-1, 2048)
             y = to_categorical(y_all[start:end], no_of_classes)
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=13)
             yield(X_train, y_train)
@@ -66,7 +66,7 @@ def val_data_generator(XValidation_directory, YValidation_directory):
             else:
                 end = int(filename.replace('.npy', '')) - 1
                 start = end - 2000
-            X = X.reshape(-1, 2048, 1, 1)
+            X = X.reshape(-1, 2048)
             y = to_categorical(y_all[start:end], no_of_classes)
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=13)
             yield(X_test, y_test)
